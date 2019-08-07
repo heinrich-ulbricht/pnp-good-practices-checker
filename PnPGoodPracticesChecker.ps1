@@ -30,16 +30,22 @@ function Connect($url = $adminSiteOrNormalSiteYouHaveAccessTo)
 {
     if ($loginType -eq [LoginTypes]::Simple)
     {
-        Connect-PnPOnline $url -Credentials $credentials
+        Connect-PnPOnline $url -Credentials $credentials -ErrorAction Stop
     } elseif ($loginType -eq [LoginTypes]::Multifactor)
     {
-        Connect-PnPOnline $url -PnPO365ManagementShell -LaunchBrowser
+        Connect-PnPOnline $url -PnPO365ManagementShell -LaunchBrowser -ErrorAction Stop
     } elseif ($loginType -eq [LoginTypes]::ADFS)
     {
-        Connect-PnPOnline $url -UseWebLogin
+        Connect-PnPOnline $url -UseWebLogin -ErrorAction Stop
     } else
     {
         Write-Error "Don't know how to connect"
+        exit
+    }
+
+    if (!$?) 
+    {
+        Write-Host "Could not connect." -ForegroundColor Red
         exit
     }
 }
@@ -92,7 +98,7 @@ function CheckTenantLanguage
 
             if ($lcid -ne 1033) 
             {
-                Write-Host "[Tenant] The tenant language was not set to US English. This might have unintended consequences. You cannot change this." -ForegroundColor Yellow
+                Write-Host "[Tenant] The tenant language was not set to US English (instead it's LCID $($lcid)). This might have unintended consequences. You cannot change this." -ForegroundColor Yellow
                 Write-Host "[Tenant] See: https://thomy.tech/10-things-you-should-do-with-your-office365-demo-or-dev-tenant." -ForegroundColor DarkYellow
 
                 # maybe check Get-MsolCompanyInformation as well?
@@ -237,6 +243,11 @@ function CheckManagedMetadataServiceAdmin
 {
     $groups = Get-PnPTermGroup
     $groupCount = $groups.Count
+    if ($groupCount -eq 0)
+    {
+        Write-Host "Got 0 term groups, that's odd. There should be system groups available. Something went wrong." -ForegroundColor Yellow
+        return
+    }
     $errorCount = 0
     foreach ($group in $groups)
     {
@@ -255,7 +266,7 @@ function CheckManagedMetadataServiceAdmin
         
     } else
     {
-        Write-Host "[Term Store] Either you have access to all term groups or you are term store administrator. This check shall pass." -ForegroundColor Green
+        Write-Host "[Term Store] Either you have access to all $groupCount term groups or you are term store administrator. This check shall pass." -ForegroundColor Green
     }
 }
 
