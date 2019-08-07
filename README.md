@@ -10,9 +10,11 @@ I decided to automate some of those tips with PnP PowerShell.
 
 # Running the Script
 
-* download the PowerShell script
-* configure the admin URL for your tenant in the configuration section of the script
+* download the PowerShell script _PnPGoodPracticesChecker.ps1_
+* in the script, configure the admin URL for your tenant in the configuration section
+  * example: `$adminSiteOrNormalSiteYouHaveAccessTo = "https://contoso-admin.sharepoint.com"`
 * (optional) configuration authentication method (simple, adfs, multifactor)
+  * example: `$loginType = [LoginTypes]::Simple`
 * run the script
 
 The checks start immediately.
